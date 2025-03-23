@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Planets</title>
+</head>
+<body>
+    <h1>Available Planets</h1>
+    
+    <ul>
+        {% for planet in planets %}
+            <li>
+                <a href="{% url 'get_planet_photo' planet %}">{{ planet|title }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

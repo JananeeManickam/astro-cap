@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Available Telescopes</title>
+    <script>
+      function openTelescopeLive(telescopeName) {
+        const url = `/pictures/telescopes/${telescopeName}/`; // ✅ Fixed URL format
+        console.log("Opening URL:", url); // Debugging in browser console
+        window.open(url, "_blank");
+      }
+    </script>
+  </head>
+  <body>
+    <h1>Available Telescopes</h1>
+    <ul>
+      {% for name, url in telescopes.items %}
+      <li>
+        <a href="#" onclick="openTelescopeLive('{{ name }}'); return false;">
+          {{ name | title }} Telescope
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </body>
+</html>

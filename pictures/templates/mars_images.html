@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mars Rover Photos</title>
+</head>
+<body>
+    <h1>Mars Rover Images</h1>
+    <div id="images-container">
+        {% for image in images %}
+            <div>
+                <h3>Camera: {{ image.camera.full_name }}</h3>
+                <img src="{{ image.img_src }}" alt="Mars Photo" width="300">
+                <p><strong>Earth Date:</strong> {{ image.earth_date }}</p>
+                <p><strong>Rover:</strong> {{ image.rover.name }} ({{ image.rover.status }})</p>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

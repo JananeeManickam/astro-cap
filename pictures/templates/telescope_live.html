@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ telescope_name|title }} Live View</title>
+</head>
+<body>
+    <h1>{{ telescope_name|title }} Live View</h1>
+
+    {% if live_view_url %}
+        <iframe 
+            src="{{ live_view_url }}" 
+            width="800" 
+            height="600" 
+            frameborder="0" 
+            allowfullscreen>
+        </iframe>
+    {% else %}
+        <p>Live stream currently unavailable.</p>
+    {% endif %}
+
+    <br>
+    <a href="/pictures/telescopes/">Back to Telescopes List</a>
+</body>
+</html>

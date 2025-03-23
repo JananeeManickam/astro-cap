@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Hubble Live Data{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="text-center mb-4">Hubble Space Telescope - Live Data</h1>
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0">Current Observation</h2>
+                </div>
+                <div class="card-body">
+                    {% if current_observation %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                {% if current_observation.image_url %}
+                                    <img src="{{ current_observation.image_url }}" alt="{{ current_observation.title }}" class="img-fluid rounded mb-3">
+                                {% else %}
+                                    <div class="text-center p-5 bg-light rounded mb-3">
+                                        <p>No image available</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <h3>{{ current_observation.title }}</h3>
+                                <p class="text-muted">
+                                    <strong>Target:</strong> {{ current_observation.target_name|default:"Unknown" }}<br>
+                                    <strong>Type:</strong> {{ current_observation.type|default:"Unknown" }}<br>
+                                    <strong>Date:</strong> {{ current_observation.observation_date|date:"F j, Y" }}
+                                </p>
+                                <p>{{ current_observation.description|linebreaks }}</p>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            No current observation data available.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h2 class="h4 mb-0">Telescope Status</h2>
+                </div>
+                <div class="card-body">
+                    {% if instrument_status %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h4>Current Status: 
+                                    <span class="badge {% if instrument_status.status == 'Operational' %}bg-success{% elif instrument_status.status == 'Limited' %}bg-warning{% else %}bg-danger{% endif %}">
+                                        {{ instrument_status.status }}
+                                    </span>
+                                </h4>
+                                <p>
+                                    <strong>Current Instrument:</strong> {{ instrument_status.current_instrument|default:"Unknown" }}<br>
+                                    <strong>Last Updated:</strong> {{ instrument_status.updated_at|date:"F j, Y H:i" }}
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <h4>Instrument Details</h4>
+                                <ul class="list-group">
+                                    {% for key, value in instrument_status.instruments.items %}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            {{ key }}
+                                            <span class="badge {% if value == 'Operational' %}bg-success{% elif value == 'Limited' %}bg-warning{% else %}bg-danger{% endif %}">
+                                                {{ value }}
+                                            </span>
+                                        </li>
+                                    {% empty %}
+                                        <li class="list-group-item">No instrument details available</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            No instrument status data available.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <p class="text-muted">Data refreshed at: {% now "F j, Y H:i:s" %}</p>
+                <button id="refresh-data" class="btn btn-primary">Refresh Data</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('refresh-data').addEventListener('click', function() {
+        location.reload();
+    });
+</script>
+{% endblock %}

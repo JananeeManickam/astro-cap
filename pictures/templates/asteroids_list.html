@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Near-Earth Objects</title>
+  </head>
+  <body>
+    <h1>Near-Earth Objects (Asteroids)</h1>
+
+    <!-- Date Selection Form -->
+    <form method="GET" action="">
+      <label for="start_date">Start Date:</label>
+      <input
+        type="date"
+        id="start_date"
+        name="start_date"
+        value="{{ start_date }}"
+      />
+      <label for="end_date">End Date:</label>
+      <input type="date" id="end_date" name="end_date" value="{{ end_date }}" />
+      <button type="submit">Search</button>
+    </form>
+
+    <!-- Display Asteroids -->
+    <ul>
+      {% for asteroid in asteroids %}
+      <li>
+        <h2>{{ asteroid.name }}</h2>
+        <p>
+          <strong>Close Approach Date:</strong> {{ asteroid.close_approach_date
+          }}
+        </p>
+        <p>
+          <strong>Velocity:</strong> {{ asteroid.relative_velocity_kph }} km/h
+        </p>
+        <p>
+          <strong>Miss Distance:</strong> {{ asteroid.miss_distance_km }} km
+        </p>
+        <p>
+          <strong>Estimated Diameter:</strong> {{
+          asteroid.estimated_diameter_km.min }} - {{
+          asteroid.estimated_diameter_km.max }} km
+        </p>
+        <p>
+          <strong>Potentially Hazardous:</strong> {{
+          asteroid.is_potentially_hazardous }}
+        </p>
+        <p>
+          <a href="{{ asteroid.nasa_jpl_url }}" target="_blank">More Info</a>
+        </p>
+      </li>
+      {% empty %}
+      <p>No asteroids found in the selected date range.</p>
+      {% endfor %}
+    </ul>
+  </body>
+</html>
