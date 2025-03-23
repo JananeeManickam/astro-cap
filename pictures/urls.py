@@ -6,6 +6,7 @@ from pictures.views.home import PicturesHome
 from pictures.views.planets import PlanetListView, get_planet_photo
 from pictures.views.stellarium import StellariumSkyView
 from pictures.views.telescopes import TelescopeListView, get_telescope_view
+from pictures.views.satellites import SatellitesView
 
 router = DefaultRouter()
 
@@ -29,4 +30,8 @@ urlpatterns = [
     
     # ✨ Constellations
     path('constellations/', constellations_view, name='constellations'),
+    
+    # 📡 Satellites
+    path('satellites/', SatellitesView.as_view(), name='satellite_passes'),
+    # path('satellites/', SatellitePassesView.as_view(), name='satellite_passes'),
 ]

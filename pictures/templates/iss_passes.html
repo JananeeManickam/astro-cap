@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Satellite Passes Tracker</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f5f5f5;
+        color: #333;
+      }
+      .container {
+        width: 95%;
+        margin: 20px auto;
+      }
+      .header {
+        background-color: #004080;
+        color: white;
+        padding: 10px 0;
+        text-align: center;
+        border-radius: 5px 5px 0 0;
+        border-bottom: 2px solid #002040;
+      }
+      .prediction-title {
+        background-color: #fff;
+        padding: 10px;
+        margin-top: 20px;
+        border: 1px solid #ddd;
+        font-size: 24px;
+        font-weight: bold;
+      }
+      .satellite-info {
+        display: flex;
+        flex-wrap: wrap;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        margin-bottom: 20px;
+      }
+      .info-left,
+      .info-right {
+        flex: 1;
+        min-width: 300px;
+        padding: 10px;
+      }
+      .info-item {
+        margin-bottom: 10px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 5px;
+      }
+      .info-label {
+        font-weight: bold;
+        display: inline-block;
+        width: 180px;
+      }
+      .pass-options {
+        display: flex;
+        background-color: #004080;
+        margin-top: 20px;
+      }
+      .option-button {
+        background-color: #004080;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s;
+      }
+      .option-button:hover {
+        background-color: #005bb5;
+      }
+      .option-button.active {
+        background-color: #0066cc;
+      }
+      .passes-table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #fff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      .passes-table th {
+        background-color: #004080;
+        color: white;
+        text-align: center;
+        padding: 10px;
+        border: 1px solid #00264d;
+      }
+      .passes-table td {
+        padding: 8px 10px;
+        border: 1px solid #ddd;
+        text-align: center;
+      }
+      .passes-table tr:nth-child(even) {
+        background-color: #f2f7ff;
+      }
+      .passes-table tr:hover {
+        background-color: #e6f0ff;
+      }
+      .direction {
+        font-weight: bold;
+      }
+      .map-link {
+        color: #0066cc;
+        text-decoration: none;
+      }
+      .map-link:hover {
+        text-decoration: underline;
+      }
+      .legend {
+        margin-top: 10px;
+        display: flex;
+        gap: 10px;
+        background-color: #f9f9f9;
+        padding: 10px;
+        border: 1px solid #ddd;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        margin-right: 15px;
+      }
+      .legend-color {
+        width: 20px;
+        height: 20px;
+        margin-right: 5px;
+      }
+      .not-visible {
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+      }
+      .marginal {
+        background-color: #ffffcc;
+        border: 1px solid #e6e600;
+      }
+      .good {
+        background-color: #ccffcc;
+        border: 1px solid #00cc00;
+      }
+      .excellent {
+        background-color: #ffcc99;
+        border: 1px solid #ff9933;
+      }
+
+      /* Visibility classes for table rows */
+      .visibility-marginal {
+        background-color: #ffffcc !important;
+      }
+      .visibility-good {
+        background-color: #ccffcc !important;
+      }
+      .visibility-excellent {
+        background-color: #ffcc99 !important;
+      }
+      .highlight-row {
+        border-left: 4px solid #0066cc !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Satellite Passes Tracker</h1>
+      </div>
+
+      <div class="prediction-title">10-DAY PREDICTIONS</div>
+
+      <div class="satellite-info">
+        <div class="info-left">
+          <div class="info-item">
+            <span class="info-label">Object name:</span>
+            <span class="info-value">{{ satellite.name }}</span>
+            <a href="#" style="margin-left: 10px; color: #0066cc"
+              >Live tracking</a
+            >
+            |
+            <a href="#" style="color: #0066cc">More info</a>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Catalog #:</span>
+            <span class="info-value">{{ satellite.catalog_number }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Observing location:</span>
+            <span class="info-value">{{ satellite.location }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Observing coord.:</span>
+            <span class="info-value">{{ satellite.coordinates }}</span>
+            <a href="#" style="margin-left: 10px; color: #0066cc">Change</a>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Local time zone:</span>
+            <span class="info-value">GMT +5.5</span>
+          </div>
+        </div>
+        <div class="info-right">
+          <div class="info-item">
+            <span class="info-label">Uplink (MHz):</span>
+            <span class="info-value"
+              >{{ satellite.technical_info.uplink }}</span
+            >
+          </div>
+          <div class="info-item">
+            <span class="info-label">Downlink (MHz):</span>
+            <span class="info-value"
+              >{{ satellite.technical_info.downlink }}</span
+            >
+          </div>
+          <div class="info-item">
+            <span class="info-label">Beacon (MHz):</span>
+            <span class="info-value"
+              >{{ satellite.technical_info.beacon }}</span
+            >
+          </div>
+          <div class="info-item">
+            <span class="info-label">Mode:</span>
+            <span class="info-value">{{ satellite.technical_info.mode }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Call sign:</span>
+            <span class="info-value"
+              >{{ satellite.technical_info.call_sign }}</span
+            >
+          </div>
+          <div class="info-item">
+            <span class="info-label">Status:</span>
+            <span class="info-value"
+              >{{ satellite.technical_info.status }}</span
+            >
+          </div>
+        </div>
+      </div>
+
+      <div class="pass-options">
+        <a
+          href="?format=all"
+          class="option-button {% if current_format == 'all' %}active{% endif %}"
+          >All passes</a
+        >
+        <a
+          href="?format=ampm"
+          class="option-button {% if current_format == 'ampm' %}active{% endif %}"
+          >AM/PM time</a
+        >
+        <a
+          href="?format=utc"
+          class="option-button {% if current_format == 'utc' %}active{% endif %}"
+          >UTC</a
+        >
+        <button id="printPdf" class="option-button">Print as PDF</button>
+      </div>
+
+      <table class="passes-table">
+        <thead>
+          <tr>
+            <th colspan="2">Start <span style="color: #7fff7f">↑</span></th>
+            <th colspan="2">Max altitude</th>
+            <th colspan="2">End <span style="color: #ff7f7f">↓</span></th>
+            <th rowspan="2">Mag <span style="color: #7f7fff">↑</span></th>
+            <th rowspan="2">Info</th>
+          </tr>
+          <tr>
+            <th>Date, Local time</th>
+            <th>Az</th>
+            <th>Local time</th>
+            <th>Az</th>
+            <th>Local time</th>
+            <th>Az</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for pass in passes %}
+          <tr
+            class="{% if forloop.first %}highlight-row{% endif %} visibility-{{ pass.visibility }}"
+          >
+            <td>{{ pass.date }}</td>
+            <td>{{ pass.start_az }}</td>
+            <td>{{ pass.max_time }}</td>
+            <td>{{ pass.max_az }}</td>
+            <td>{{ pass.end_time }}</td>
+            <td>{{ pass.end_az }}</td>
+            <td>{{ pass.magnitude }}</td>
+            <td><a href="#" class="map-link">{{ pass.info }}</a></td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8">No passes found for this satellite</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-color not-visible"></div>
+          <span>Not visible</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color marginal"></div>
+          <span>Marginal</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color good"></div>
+          <span>Good</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color excellent"></div>
+          <span>Excellent</span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Set up the Print PDF button
+        const pdfBtn = document.getElementById("printPdf");
+
+        pdfBtn.addEventListener("click", function () {
+          // Handle PDF printing
+          window.print();
+        });
+
+        // Preserve existing URL parameters when switching time formats
+        const allLinks = document.querySelectorAll(".option-button");
+        allLinks.forEach((link) => {
+          if (link.href) {
+            const url = new URL(link.href);
+            const currentUrl = new URL(window.location.href);
+
+            // Copy all parameters except format
+            for (const [key, value] of currentUrl.searchParams.entries()) {
+              if (key !== "format") {
+                url.searchParams.set(key, value);
+              }
+            }
+
+            link.href = url.toString();
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
