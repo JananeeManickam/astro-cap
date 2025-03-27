@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Astronomy Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #chat-container {
+            border: 1px solid #ccc;
+            height: 400px;
+            overflow-y: scroll;
+            padding: 10px;
+        }
+        #message-input, #image-input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .user-message {
+            text-align: right;
+            color: blue;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .user-message-content {
+            max-width: 70%;
+        }
+        .user-image {
+            max-width: 100px;
+            max-height: 100px;
+            margin-left: 10px;
+            border-radius: 8px;
+        }
+        .bot-message {
+            text-align: left;
+            color: green;
+            margin-bottom: 10px;
+        }
+        #image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            margin: 10px 0;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container"></div>
+    
+    <img id="image-preview" src="#" alt="Image Preview">
+    
+    <input type="file" id="image-input" accept="image/*">
+    <input type="text" id="message-input" placeholder="Ask an astronomy question...">
+    <button id="send-btn">Send</button>
+    <button id="clear-btn">Clear Chat</button>
+
+    <script>
+        const chatContainer = document.getElementById('chat-container');
+        const messageInput = document.getElementById('message-input');
+        const imageInput = document.getElementById('image-input');
+        const imagePreview = document.getElementById('image-preview');
+        const sendBtn = document.getElementById('send-btn');
+        const clearBtn = document.getElementById('clear-btn');
+
+        // Image preview
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    imagePreview.src = event.target.result;
+                    imagePreview.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        sendBtn.addEventListener('click', sendMessage);
+        clearBtn.addEventListener('click', clearChat);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            const imageFile = imageInput.files[0];
+
+            // Create FormData to send both text and image
+            const formData = new FormData();
+            if (message) formData.append('message', message);
+            if (imageFile) formData.append('image', imageFile);
+
+            // If no input, do nothing
+            if (!message && !imageFile) return;
+
+            // Prepare message display
+            const messageContainer = document.createElement('div');
+            messageContainer.className = 'user-message';
+
+            const messageContent = document.createElement('div');
+            messageContent.className = 'user-message-content';
+            
+            // Add text message if exists
+            if (message) {
+                messageContent.textContent = message;
+            }
+
+            // Add image if uploaded
+            if (imageFile) {
+                const imageElement = document.createElement('img');
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    imageElement.src = event.target.result;
+                    imageElement.className = 'user-image';
+                };
+                reader.readAsDataURL(imageFile);
+                messageContainer.appendChild(imageElement);
+            }
+
+            messageContainer.appendChild(messageContent);
+            chatContainer.appendChild(messageContainer);
+
+            messageInput.value = '';
+
+            // Send to backend
+            fetch('/chatbot/chat/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                const botMessageElement = document.createElement('div');
+                botMessageElement.textContent = data.message;
+                botMessageElement.className = 'bot-message';
+                chatContainer.appendChild(botMessageElement);
+                
+                // Scroll to bottom
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                const errorMessageElement = document.createElement('div');
+                errorMessageElement.textContent = 'Sorry, something went wrong.';
+                errorMessageElement.className = 'bot-message';
+                chatContainer.appendChild(errorMessageElement);
+            });
+
+            // Reset image preview
+            imagePreview.style.display = 'none';
+            imageInput.value = '';
+        }
+
+        function clearChat() {
+            fetch('/chatbot/chat/', {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(() => {
+                chatContainer.innerHTML = '';
+            });
+        }
+
+        // Helper function to get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>

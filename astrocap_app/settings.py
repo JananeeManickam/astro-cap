@@ -19,18 +19,13 @@ from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-%&z=s7yj42xb4k1ncgut^yi)cwe3hqmpo5&7iv0oy6w1xn@+bf'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
+DEBUG = False
+# DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -49,6 +44,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'users',
     'pictures',
+    'chatbot',
 ]
 
 # CORS settings
@@ -67,7 +63,9 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React frontend
 ]
+CORS_ORIGIN_ALLOW_ALL = True
 ROOT_URLCONF = 'astrocap_app.urls'
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -84,17 +82,27 @@ TEMPLATES = [
     },
 ]
 
+# GenAi
+SECRET_KEY = 'AIzaSyD3lNxKVfPt62OQaXlfwqEIkmiWN_YMrxw'
+
 WSGI_APPLICATION = 'astrocap_app.wsgi.application'
 
-# Database (Using MongoEngine instead of Djongo)
-# https://docs.djangoproject.com/en/4.1/ref/settings/#databases
+# session
+SESSION_ENGINE = "django.contrib.sessions.backends.db"  # Stores sessions in DB
+
+# Ensure chatbot sessions persist
+SESSION_COOKIE_AGE = 3600  # 1 hour session duration
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_COOKIE_SECURE = False  # Set to True in production
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
 
 connect("astro_cap", host="mongodb://localhost:27017/") 
-
+# connect("astro_cap", host="mongodb://localhost:27017/astro_cap") 
 DATABASES = {} 
+# DATABASES = {"default": {"ENGINE": "django.db.backends.dummy"}}  # Django needs a database dict
 
-# Password validation
-# https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -107,7 +115,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
-    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.AllowAny',)
+    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.AllowAny',),
 }
 
 SIMPLE_JWT = {
@@ -123,8 +131,6 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 )
-# Internationalization
-# https://docs.djangoproject.com/en/4.1/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
@@ -133,9 +139,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
 
