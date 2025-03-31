@@ -5,7 +5,7 @@ from pictures.views.constellations import constellations_view
 from pictures.views.home import PicturesHome
 from pictures.views.planets import PlanetListView, get_planet_photo
 from pictures.views.stellarium import StellariumSkyView
-from pictures.views.telescopes import TelescopeListView, get_telescope_view
+from pictures.views.telescopes import TelescopeListView, get_telescope_view, sample_view
 from pictures.views.satellites import SatellitesView
 
 router = DefaultRouter()
@@ -13,7 +13,7 @@ router = DefaultRouter()
 urlpatterns = [
     # 🏠 Home Page
     path('', PicturesHome.as_view(), name='pictures_home'),
-
+    path('b/', sample_view),
     # 🌃 Stellarium WebApp
     path('stellarium/', StellariumSkyView.as_view(), name='stellarium_sky'),
     

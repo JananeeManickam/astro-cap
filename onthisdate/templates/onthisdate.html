@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Astronomical Events on This Date</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f4f4f9;
+        line-height: 1.6;
+      }
+      .container {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+      }
+      h1 {
+        color: #2c3e50;
+        text-align: center;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 10px;
+      }
+      .date-display {
+        text-align: center;
+        font-size: 1.2em;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: #3498db;
+      }
+      .date-selector {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+      }
+      .date-selector select {
+        padding: 10px;
+        margin: 0 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      .date-selector button {
+        padding: 10px 15px;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .date-selector button:hover {
+        background-color: #2980b9;
+      }
+      #events-container {
+        margin-top: 20px;
+      }
+      .event-card {
+        background-color: #f9f9f9;
+        border-left: 4px solid #3498db;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 4px;
+      }
+      .event-type {
+        font-weight: bold;
+        color: #2980b9;
+        margin-bottom: 5px;
+      }
+      .loading {
+        text-align: center;
+        color: #7f8c8d;
+        padding: 20px;
+      }
+      .error {
+        color: #e74c3c;
+        text-align: center;
+        padding: 20px;
+        background-color: #fadbd8;
+        border-radius: 4px;
+        margin-top: 20px;
+      }
+      .tab-container {
+        display: flex;
+        margin-bottom: 20px;
+      }
+      .tab {
+        padding: 10px 20px;
+        background-color: #eee;
+        cursor: pointer;
+        border-radius: 4px 4px 0 0;
+        border: 1px solid #ddd;
+        border-bottom: none;
+        margin-right: 5px;
+      }
+      .tab.active {
+        background-color: white;
+        font-weight: bold;
+      }
+      .tab-content {
+        border-top: 1px solid #ddd;
+        padding-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🌌 Astronomical Events on This Date 🚀</h1>
+      
+      <div id="date-display" class="date-display"></div>
+
+      <div class="tab-container">
+        <div id="today-tab" class="tab active" onclick="switchTab('today')">Today's Events</div>
+        <div id="custom-tab" class="tab" onclick="switchTab('custom')">Select Custom Date</div>
+      </div>
+
+      <div id="custom-date-selector" class="date-selector" style="display: none;">
+        <select id="month-selector">
+          <option value="">Select Month</option>
+          <option value="1">January</option>
+          <option value="2">February</option>
+          <option value="3">March</option>
+          <option value="4">April</option>
+          <option value="5">May</option>
+          <option value="6">June</option>
+          <option value="7">July</option>
+          <option value="8">August</option>
+          <option value="9">September</option>
+          <option value="10">October</option>
+          <option value="11">November</option>
+          <option value="12">December</option>
+        </select>
+
+        <select id="day-selector">
+          <option value="">Select Day</option>
+          <!-- Days will be dynamically populated -->
+        </select>
+        
+        <button id="fetch-custom-date" onclick="fetchCustomDate()">Show Events</button>
+      </div>
+
+      <div id="events-container">
+        <div class="loading">Loading today's astronomical events...</div>
+      </div>
+    </div>
+
+    <script>
+      // Month names for display
+      const monthNames = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+      ];
+      
+      // Populate days based on selected month
+      const monthSelector = document.getElementById("month-selector");
+      const daySelector = document.getElementById("day-selector");
+      const eventsContainer = document.getElementById("events-container");
+      const dateDisplay = document.getElementById("date-display");
+      const customDateSelector = document.getElementById("custom-date-selector");
+      
+      // Initialize with today's events
+      document.addEventListener("DOMContentLoaded", function() {
+        fetchTodayEvents();
+      });
+
+      // Switch between tabs
+      function switchTab(tab) {
+        if (tab === 'today') {
+          document.getElementById('today-tab').classList.add('active');
+          document.getElementById('custom-tab').classList.remove('active');
+          customDateSelector.style.display = 'none';
+          fetchTodayEvents();
+        } else {
+          document.getElementById('custom-tab').classList.add('active');
+          document.getElementById('today-tab').classList.remove('active');
+          customDateSelector.style.display = 'flex';
+        }
+      }
+
+      monthSelector.addEventListener("change", function () {
+        // Reset day selector
+        daySelector.innerHTML = '<option value="">Select Day</option>';
+
+        // Get days in the selected month (accounting for leap year in month 2)
+        const daysInMonth = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        const selectedMonthIndex = monthSelector.selectedIndex - 1;
+
+        if (selectedMonthIndex >= 0) {
+          for (let i = 1; i <= daysInMonth[selectedMonthIndex]; i++) {
+            const option = document.createElement("option");
+            option.value = i;
+            option.textContent = i;
+            daySelector.appendChild(option);
+          }
+        }
+      });
+
+      // Fetch today's astronomical events
+      function fetchTodayEvents() {
+        // Show loading
+        eventsContainer.innerHTML =
+          '<div class="loading">Loading today\'s astronomical events...</div>';
+
+        // Make AJAX call to get today's events
+        axios
+          .get("/onthisdate/events/")
+          .then((response) => {
+            const events = response.data.events;
+            const currentDate = response.data.current_date;
+            
+            // Update date display using the month_name from API
+            if (currentDate.month_name) {
+              dateDisplay.textContent = `${currentDate.month_name} ${currentDate.day}`;
+            } else {
+              dateDisplay.textContent = `${monthNames[currentDate.month - 1]} ${currentDate.day}`;
+            }
+            
+            renderEvents(events);
+          })
+          .catch((error) => {
+            console.error("Error fetching today's events:", error);
+            let errorMessage = 'Failed to fetch today\'s astronomical events. Please try again later.';
+            
+            // Try to extract error message from response if available
+            if (error.response && error.response.data && error.response.data.error) {
+              errorMessage = error.response.data.error;
+            }
+            
+            eventsContainer.innerHTML = `
+                <div class="error">
+                    ${errorMessage}
+                </div>
+            `;
+          });
+      }
+
+      // Fetch custom date astronomical events
+      function fetchCustomDate() {
+        const month = monthSelector.value;
+        const day = daySelector.value;
+
+        if (!month || !day) {
+          alert("Please select both month and day");
+          return;
+        }
+
+        // Show loading
+        eventsContainer.innerHTML =
+          '<div class="loading">Loading astronomical events...</div>';
+
+        // Make AJAX call
+        axios
+          .post("/onthisdate/events/", {
+            month: month,
+            day: day,
+          })
+          .then((response) => {
+            const events = response.data.events;
+            const currentDate = response.data.current_date;
+            
+            // Update date display using the month_name from API if available
+            if (currentDate && currentDate.month_name) {
+              dateDisplay.textContent = `${currentDate.month_name} ${currentDate.day}`;
+            } else {
+              dateDisplay.textContent = `${monthNames[month - 1]} ${day}`;
+            }
+            
+            renderEvents(events);
+          })
+          .catch((error) => {
+            console.error("Error fetching events:", error);
+            let errorMessage = 'Failed to fetch astronomical events. Please try again later.';
+            
+            // Try to extract error message from response if available
+            if (error.response && error.response.data && error.response.data.error) {
+              errorMessage = error.response.data.error;
+            }
+            
+            eventsContainer.innerHTML = `
+                <div class="error">
+                    ${errorMessage}
+                </div>
+            `;
+          });
+      }
+      
+      // Render events to the container
+      function renderEvents(events) {
+        if (!events || events.length === 0) {
+          eventsContainer.innerHTML =
+            '<div class="error">No astronomical events found for this date.</div>';
+          return;
+        }
+
+        // Render events
+        eventsContainer.innerHTML = events
+          .map(
+            (event) => `
+                <div class="event-card">
+                    <div class="event-type">${event.event_type} - ${event.year}</div>
+                    <div class="event-description">${event.event_description}</div>
+                </div>
+            `
+          )
+          .join("");
+      }
+    </script>
+  </body>
+</html>

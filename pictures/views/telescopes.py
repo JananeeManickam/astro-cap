@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views import View
 import logging
+from rest_framework.response import Response
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +21,13 @@ class TelescopeListView(View):
     def get(self, request):
         logger.info("Fetching telescope list.")
         return render(request, "telescopes.html", {"telescopes": TELESCOPES})
+
+def sample_view(request):
+    dic = {
+        "name": "sambar",
+        "age" : 62
+    }
+    return Response(data=dic, status=200)
 
 
 def get_telescope_view(request, telescope_name):

@@ -32,7 +32,9 @@ urlpatterns = [
     path('api/auth/user/', UserDetailView.as_view(), name='user_detail'),
     path('api/google/validate_token', validate_google_token, name='validate_token'),
     
+    path('a/', include('pictures.urls')),
     path('pictures/', include('pictures.urls')),
     path('info/', include('users.urls')),
     path('chatbot/', include('chatbot.urls')),
+    path('onthisdate/', include('onthisdate.urls')),
 ]

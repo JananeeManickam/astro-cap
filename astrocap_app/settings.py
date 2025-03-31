@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'users',
     'pictures',
     'chatbot',
+    'onthisdate',
 ]
 
 # CORS settings
@@ -61,8 +62,12 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # React frontend
+    "http://localhost:8000",  # React frontend
 ]
+
+ALLOWED_HOSTS = ['*']
+DEBUG=True
+
 CORS_ORIGIN_ALLOW_ALL = True
 ROOT_URLCONF = 'astrocap_app.urls'
 
