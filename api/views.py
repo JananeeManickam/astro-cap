@@ -51,7 +51,7 @@ def google_login_callback(request):
         return redirect(f'http://localhost:8002/login/callback/?access_token={access_token}')
     else:
         print("No token found")
-        return redirect(f'http://lo  calhost:8002/login/callback/?error=NoGoogleToken')
+        return redirect(f'http://localhost:8002/login/callback/?error=NoGoogleToken')
     
     
 @csrf_exempt

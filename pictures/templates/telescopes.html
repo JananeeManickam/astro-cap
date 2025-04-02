@@ -4,7 +4,7 @@
     <title>Available Telescopes</title>
     <script>
       function openTelescopeLive(telescopeName) {
-        const url = `/pictures/telescopes/${telescopeName}/`; // ✅ Fixed URL format
+        const url = `/api/pictures/telescopes/${telescopeName}/`; // Add the /api/ prefix
         console.log("Opening URL:", url); // Debugging in browser console
         window.open(url, "_blank");
       }

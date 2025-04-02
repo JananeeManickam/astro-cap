@@ -22,18 +22,11 @@ class TelescopeListView(View):
         logger.info("Fetching telescope list.")
         return render(request, "telescopes.html", {"telescopes": TELESCOPES})
 
-def sample_view(request):
-    dic = {
-        "name": "sambar",
-        "age" : 62
-    }
-    return Response(data=dic, status=200)
-
 
 def get_telescope_view(request, telescope_name):
     """
     Redirects users to live telescope data.
-    Expected URL: `/pictures/telescopes/<telescope_name>/`
+    Expected URL: `telescopes/<telescope_name>/`
     """
     logger.info(f"Request received for telescope: {telescope_name}")
 
