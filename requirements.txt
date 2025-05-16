@@ -12,3 +12,9 @@ mongoengine>=0.24.0
 requests>=2.28.0
 cryptography>=40.0.0
 python-dotenv>=1.0.0
+beautifulsoup4
+celery
+redis
+pillow
+channels
+channels-redis
