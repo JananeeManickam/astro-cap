@@ -9,8 +9,10 @@ from .serializers import AstronomicalEventSerializer
 from datetime import datetime
 from django.conf import settings
 from django.db.utils import DatabaseError
+from rest_framework.permissions import AllowAny
 
 class OnThisDateView(APIView):
+    permission_classes = [AllowAny]
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Configure Gemini API 
@@ -211,6 +213,6 @@ class OnThisDateView(APIView):
 
 def onthisdate_interface(request):
     """
-    Render the On This Date HTML interface
+    Render the HTML interface
     """
     return render(request, 'onthisdate.html')

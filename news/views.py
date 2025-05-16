@@ -2,8 +2,10 @@
 import requests
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny     
 
 class SpaceNewsAPIView(APIView):
+    permission_classes = [AllowAny]
     def get(self, request):
         api_key = "de59ad6200fb4e8289b7528b9e937515"
         url = "https://newsapi.org/v2/everything"

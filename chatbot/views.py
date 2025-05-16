@@ -8,14 +8,11 @@ from django.shortcuts import render
 from django.core.files.storage import default_storage
 from django.conf import settings
 from PIL import Image
+from rest_framework.permissions import AllowAny
 
-def chatbot_interface(request):
-    """
-    Render the chatbot HTML interface
-    """
-    return render(request, 'index.html')
 
 class AstronomyChatbotView(APIView):
+    permission_classes = [AllowAny]
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Configure Gemini API 
@@ -32,13 +29,12 @@ class AstronomyChatbotView(APIView):
         prompt = f"""You are an astronomy-focused chatbot. 
         Only answer questions briefly (in 2 to 4 lines) related to astronomy, 
         astrophysics, space exploration, celestial bodies, 
-        and cosmic phenomena. 
-        If the query is not related to astronomy, 
-        politely decline to answer.
+        and cosmic phenomena. NOTE: If the query is not related to astronomy, 
+        strictly decline to answer and acknowledge them.
 
         Question: {message}
         
-        Provide a detailed, informative answer."""
+        Provide a brief, informative answer."""
 
         response = self.text_model.generate_content(prompt)
         return response.text
@@ -71,6 +67,7 @@ class AstronomyChatbotView(APIView):
         image_file = request.FILES.get('image')
         message = request.data.get('message', '')
 
+        print("-"*90)
         print("Received message:", message)
         print("Received image:", bool(image_file))
 
@@ -92,6 +89,7 @@ class AstronomyChatbotView(APIView):
                 bot_response = "Please provide either a text message or an image to analyze."
 
             print("Generated response:", bot_response)
+            print("-"*90)
 
             return Response({
                 'message': bot_response

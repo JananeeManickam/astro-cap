@@ -1,59 +1,246 @@
-{% extends "base.html" %}
-{% load static %}
+{% extends "base.html" %} {% load static %} {% block title %}Constellations of
+the Night Sky{% endblock %} {% block extra_css %}
+<style>
+  .constellation-card {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #2a4365;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
 
-{% block title %}Constellations of the Night Sky{% endblock %}
+  .constellation-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(66, 153, 225, 0.4);
+  }
 
-{% block content %}
-<div class="p-6 bg-gray-100 min-h-screen">
-  <div class="max-w-6xl mx-auto">
-    <h1 class="text-3xl font-bold text-center mb-8 text-blue-900">Constellations of the Night Sky</h1>
-    
-    <div class="mb-6">
+  .constellation-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(56, 178, 255, 0.1),
+      transparent
+    );
+    transition: height 0.3s ease;
+    z-index: 1;
+  }
+
+  .constellation-card:hover::before {
+    height: 100%;
+  }
+
+  .constellation-card::after {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(
+      circle,
+      rgba(56, 178, 255, 0.3) 0%,
+      transparent 70%
+    );
+    transform: translate(-100%, -100%);
+    transition: transform 0.5s ease;
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  .constellation-card:hover::after {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+
+  .search-input {
+    background-color: #1a202c;
+    color: #e2e8f0;
+    border-color: #2d3748;
+    transition: all 0.3s ease;
+  }
+
+  .search-input:focus {
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+  }
+
+  .star-dot {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background-color: white;
+    border-radius: 50%;
+    opacity: 0.7;
+    z-index: 0;
+  }
+
+  @keyframes pulse {
+    0% {
+      opacity: 0.3;
+    }
+    50% {
+      opacity: 0.8;
+    }
+    100% {
+      opacity: 0.3;
+    }
+  }
+
+  .star-pulse {
+    animation: pulse 3s infinite;
+  }
+
+  /* Ensure grid layout works properly */
+  .constellation-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 640px) {
+    .constellation-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 768px) {
+    .constellation-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="p-6 bg-gray-900 min-h-screen">
+  <div class="max-w-7xl mx-auto relative">
+    <!-- Star background -->
+    <div
+      id="starBackground"
+      class="absolute inset-0 overflow-hidden pointer-events-none z-0"
+    ></div>
+
+    <h1 class="text-3xl font-bold text-center mb-8 text-blue-400 relative z-10">
+      Constellations of the Night Sky
+    </h1>
+
+    <!-- Search -->
+    <div class="mb-6 relative z-10">
       <form method="GET" action="{% url 'constellations' %}">
         <input
           type="text"
           name="search"
           placeholder="Search constellations..."
-          class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="w-full p-3 border rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-800 border-gray-700 text-blue-100 search-input"
           value="{{ search_term }}"
-        >
+        />
       </form>
     </div>
-    
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+
+    <!-- Cards Grid -->
+    <div class="constellation-grid relative z-10">
       {% for constellation in constellations %}
-        <a 
-          href="https://en.wikipedia.org/wiki/{{ constellation.name }}_(constellation)"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="block"
-        >
-          <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
-            <div class="p-4 flex-1 flex flex-col">
-              <h2 class="text-xl font-semibold text-blue-800 mb-1">{{ constellation.name }}</h2>
-              <p class="text-gray-600 italic">{{ constellation.full_name }}</p>
-              <div class="bg-blue-50 mt-3 p-2 rounded text-xs text-blue-700 font-mono">{{ constellation.id }}</div>
-              <div class="mt-auto pt-3">
-                <p class="text-sm text-blue-600 font-medium">Click to learn more →</p>
-              </div>
+      <a
+        href="https://en.wikipedia.org/wiki/{{ constellation.name }}_(constellation)"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="block h-full"
+      >
+        <div class="bg-gray-800 rounded-lg overflow-hidden constellation-card">
+          <div class="p-5 flex-1 flex flex-col relative z-10">
+            <h2 class="text-xl font-semibold text-blue-300 mb-1">
+              {{ constellation.name }}
+            </h2>
+            <p class="text-gray-400 italic">{{ constellation.full_name }}</p>
+            <div
+              class="bg-gray-900 mt-3 p-2 rounded text-xs text-blue-300 font-mono border border-blue-800"
+            >
+              {{ constellation.id }}
+            </div>
+            <div class="mt-auto pt-4">
+              <p
+                class="text-sm text-blue-400 font-medium group-hover:text-blue-300 flex items-center"
+              >
+                Learn more
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  style="width: 10px; height: 10px"
+                  class="ml-1 text-blue-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  />
+                </svg>
+              </p>
             </div>
           </div>
-        </a>
+        </div>
+      </a>
       {% endfor %}
     </div>
-    
-    <div class="mt-8 text-center text-gray-600">
+
+    <!-- Result Count -->
+    <div class="mt-8 text-center text-blue-400 relative z-10">
       <p>Found {{ constellations|length }} constellations</p>
     </div>
   </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
+{% endblock %} {% block extra_js %}
 <script>
-  document.querySelector('input[name="search"]').addEventListener('input', function(e) {
-    // Submit the form on each input change for immediate filtering
-    this.form.submit();
+  // Instant search
+  document
+    .querySelector('input[name="search"]')
+    .addEventListener("input", function (e) {
+      this.form.submit();
+    });
+
+  // Star background generation
+  document.addEventListener("DOMContentLoaded", function () {
+    const starContainer = document.getElementById("starBackground");
+    const starCount = 150;
+
+    for (let i = 0; i < starCount; i++) {
+      const star = document.createElement("div");
+      star.classList.add("star-dot");
+
+      star.style.left = `${Math.random() * 100}%`;
+      star.style.top = `${Math.random() * 100}%`;
+
+      const size = Math.random() * 2 + 1;
+      star.style.width = `${size}px`;
+      star.style.height = `${size}px`;
+
+      star.style.opacity = Math.random() * 0.7 + 0.3;
+
+      if (Math.random() > 0.7) {
+        star.classList.add("star-pulse");
+      }
+
+      starContainer.appendChild(star);
+    }
+  });
+
+  // Border glow effect on hover
+  const cards = document.querySelectorAll(".constellation-card");
+  cards.forEach((card) => {
+    card.addEventListener("mouseenter", function () {
+      this.style.borderColor = "#4299e1";
+    });
+
+    card.addEventListener("mouseleave", function () {
+      this.style.borderColor = "#2a4365";
+    });
   });
 </script>
 {% endblock %}

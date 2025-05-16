@@ -11,9 +11,8 @@
 
 
 from django.urls import path
-from chatbot.views import AstronomyChatbotView, chatbot_interface
+from chatbot.views import AstronomyChatbotView
 
 urlpatterns = [
-    path('', chatbot_interface, name='chatbot-interface'),
     path('chat/', AstronomyChatbotView.as_view(), name='astronomy-chatbot'),
 ]

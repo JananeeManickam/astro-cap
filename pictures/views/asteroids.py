@@ -10,7 +10,7 @@ BASE_URL = "https://api.nasa.gov/neo/rest/v1/feed"
 
 @csrf_exempt
 def asteroid_list(request):
-    """Fetch and display Near-Earth Objects (NEOs) for a given date range."""
+    """Fetch and return Near-Earth Objects (NEOs) for a given date range as JSON."""
 
     # Get today's date as default if no date is provided
     today = datetime.date.today()
@@ -29,10 +29,10 @@ def asteroid_list(request):
 
     asteroids = []
     
-    # Iterate through each date and extract asteroid details
+    # Iterate through each date and extract asteroid 
     for date, objects in near_earth_objects.items():
         for obj in objects:
-            close_approach = obj["close_approach_data"][0]  # Get the first close approach
+            close_approach = obj["close_approach_data"][0]
             asteroids.append({
                 "id": obj["id"],
                 "name": obj["name"],
@@ -49,5 +49,11 @@ def asteroid_list(request):
                 "orbiting_body": close_approach["orbiting_body"]
             })
 
-    # Render the template with asteroid data
-    return render(request, "asteroids_list.html", {"asteroids": asteroids, "start_date": start_date, "end_date": end_date})
+    # Return JSON response with asteroid data
+    return JsonResponse({
+        "status": "success",
+        "count": len(asteroids),
+        "start_date": start_date,
+        "end_date": end_date,
+        "asteroids": asteroids
+    })
